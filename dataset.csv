@@ -1,0 +1,44 @@
+Disease,Symptom_1,Symptom_2,Symptom_3,Symptom_4,Symptom_5,Symptom_6
+Migraine,severe headache,nausea,sensitivity to light,blurred vision,throbbing pain,
+Influenza,fever,cough,fatigue,body ache,sore throat,headache
+Common Cold,runny nose,sneezing,sore throat,mild fever,cough,nasal congestion
+Dengue,high fever,severe headache,joint pain,skin rash,nausea,muscle pain
+Malaria,high fever,chills,sweating,headache,nausea,vomiting
+Typhoid,fever,abdominal pain,weakness,headache,loss of appetite,constipation
+Hepatitis A,yellowish skin,dark urine,fatigue,abdominal pain,loss of appetite,nausea
+Pneumonia,fever,cough,chest pain,shortness of breath,fatigue,sweating
+Tuberculosis,persistent cough,coughing blood,night sweats,weight loss,mild fever,fatigue
+Asthma,wheezing,shortness of breath,chest tightness,dry cough,,
+Bronchitis,cough with mucus,fatigue,shortness of breath,mild fever,chest discomfort,
+Sinusitis,facial pain,headache,nasal congestion,loss of smell,thick nasal discharge,
+Gastroenteritis,diarrhea,vomiting,abdominal pain,mild fever,nausea,
+Food Poisoning,nausea,vomiting,diarrhea,abdominal cramps,mild fever,
+Appendicitis,right lower abdominal pain,nausea,vomiting,mild fever,loss of appetite,
+Gastritis,upper abdominal pain,nausea,bloating,indigestion,loss of appetite,
+Peptic Ulcer,burning abdominal pain,bloating,nausea,heartburn,loss of appetite,
+GERD,heartburn,sour taste in mouth,difficulty swallowing,dry cough,chest burning,
+Urinary Tract Infection,burning urination,frequent urination,pelvic pain,cloudy urine,mild fever,
+Kidney Stone,severe back pain,blood in urine,nausea,vomiting,frequent urination,
+Diabetes,frequent urination,excessive thirst,unexplained weight loss,fatigue,blurred vision,
+Hypertension,headache,dizziness,blurred vision,chest pain,shortness of breath,
+Anemia,fatigue,weakness,pale skin,shortness of breath,dizziness,headache
+Hypothyroidism,fatigue,weight gain,cold intolerance,dry skin,hair loss,constipation
+Arthritis,joint pain,joint stiffness,joint swelling,reduced range of motion,morning stiffness,
+Chickenpox,skin rash,fever,fatigue,loss of appetite,itchy skin,fluid filled blisters
+Measles,fever,dry cough,runny nose,red eyes,skin rash,white spots in mouth
+Conjunctivitis,red eyes,itchy eyes,eye discharge,swollen eyelids,excessive tearing,
+Eczema,itchy skin,dry skin,red patches,skin rash,skin bumps,
+Psoriasis,red patches,silvery scales,itchy skin,dry cracked skin,joint pain,
+Fungal Skin Infection,ring shaped rash,itchy skin,red patches,scaly skin,,
+Anxiety Disorder,restlessness,excessive worry,fatigue,difficulty concentrating,irritability,sleep problems
+Depression,persistent sadness,loss of interest,fatigue,sleep problems,poor appetite,feelings of hopelessness
+Insomnia,difficulty falling asleep,waking up at night,daytime fatigue,irritability,poor concentration,
+COVID-19,fever,dry cough,fatigue,loss of taste,loss of smell,shortness of breath
+Allergic Rhinitis,sneezing,runny nose,itchy eyes,nasal congestion,watery eyes,
+Dehydration,excessive thirst,dry mouth,dark urine,fatigue,dizziness,headache
+Vertigo,dizziness,spinning sensation,nausea,balance problems,vomiting,headache
+Hemorrhoids,rectal pain,rectal bleeding,anal itching,anal swelling,lump near anus,
+Tonsillitis,sore throat,swollen tonsils,fever,difficulty swallowing,bad breath,swollen neck glands
+Ear Infection,ear pain,ear discharge,hearing loss,mild fever,headache,
+Tooth Infection,tooth pain,gum swelling,tooth sensitivity,mild fever,bad breath,
+Acne,pimples,oily skin,blackheads,whiteheads,skin redness,

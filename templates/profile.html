@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Profile | Smart Health Assistant{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm p-4 text-center">
+      <div class="display-5 mb-2">👤</div>
+      <h4>{{ user.name }}</h4>
+      <p class="text-muted mb-1">{{ user.email }}</p>
+      <p class="text-muted small mb-3">
+        {% if user.age %}{{ user.age }} years • {% endif %}
+        {% if user.gender %}{{ user.gender }} • {% endif %}
+        Joined {{ user.created_at.strftime('%d %b %Y') }}
+      </p>
+      <div class="alert alert-primary">
+        You have made <strong>{{ count }}</strong> prediction{{ '' if count == 1 else 's' }}.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

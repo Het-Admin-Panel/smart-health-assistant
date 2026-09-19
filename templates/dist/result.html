@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Result | Smart Health Assistant{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+
+    {% if urgent %}
+    <div class="alert alert-danger d-flex align-items-start shadow-sm">
+      <div class="fs-4 me-2">⚠️</div>
+      <div>
+        <strong>Urgent medical attention may be required.</strong><br>
+        Please consult a doctor as soon as possible.
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="card shadow-sm p-4 text-center mb-3">
+      <h6 class="text-muted mb-4">Based on your symptoms, the most likely conditions are</h6>
+
+      {% for disease, conf in top3 %}
+      <div class="mb-4 text-start">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <strong class="{% if loop.first %}fs-4 text-primary{% endif %}">
+            {% if loop.first %}🥇
+            {% elif loop.index == 2 %}🥈
+            {% else %}🥉{% endif %}
+            {{ disease }}
+          </strong>
+          <span class="badge bg-dark p-2">{{ conf }}%</span>
+        </div>
+        <div class="progress" style="height: 12px;">
+          <div class="progress-bar
+            {% if loop.first %}bg-danger
+            {% elif loop.index == 2 %}bg-warning
+            {% else %}bg-secondary{% endif %}"
+            style="width: {{ conf }}%;">
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="card shadow-sm p-4 mb-3">
+      <h5>🩺 Recommendations — {{ top3[0][0] }}</h5>
+      <p class="mb-3">{{ advice }}</p>
+      <h6>Symptoms you selected</h6>
+      {% for s in selected %}
+        <span class="badge bg-primary-subtle text-primary border m-1">{{ s|title }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="d-flex gap-2 justify-content-center">
+      <a href="{{ url_for('report', prediction_id=prediction_id) }}"
+         class="btn btn-outline-primary">📄 View / Download Report</a>
+      <a href="{{ url_for('predict') }}" class="btn btn-primary">🔄 New Prediction</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
