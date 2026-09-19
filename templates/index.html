@@ -1,43 +1,74 @@
 {% extends "base.html" %}
-{% block title %}Home | Smart Health Assistant{% endblock %}
+{% block title %}Smart Health Assistant — AI Doctor{% endblock %}
 {% block content %}
-<div class="hero text-white text-center rounded-4 p-5 mb-4">
-  <h1 class="fw-bold">Smart Health Assistant</h1>
-  <p class="lead mb-4">AI-powered preliminary disease prediction based on your symptoms</p>
-  <a href="{{ url_for('predict') if session.get('user_id') else url_for('register') }}"
-     class="btn btn-light btn-lg fw-bold">Get Started →</a>
-</div>
 
-<div class="row text-center g-3 mb-4">
-  <div class="col-md-4">
-    <div class="card shadow-sm p-3"><h3 class="text-primary fw-bold mb-0">{{ disease_count }}</h3><small>Diseases covered</small></div>
-  </div>
-  <div class="col-md-4">
-    <div class="card shadow-sm p-3"><h3 class="text-primary fw-bold mb-0">{{ symptom_count }}+</h3><small>Symptoms recognised</small></div>
-  </div>
-  <div class="col-md-4">
-    <div class="card shadow-sm p-3"><h3 class="text-primary fw-bold mb-0">Top 3</h3><small>Predictions with confidence</small></div>
+<div class="hero mb-4 reveal">
+  <div class="hero-badge"><i class="bi bi-stars"></i> ML + Gemini AI
+    {% if ai_enabled %}• Live{% endif %}</div>
+  <h1>Your Personal <span class="text-warning">AI Doctor</span></h1>
+  <p class="lead">Complete your health profile once — then every symptom check includes
+  your BMI, lifestyle, medical history and allergies, just like a real consultation.</p>
+  <div class="d-flex gap-2 justify-content-center flex-wrap">
+    <a href="{{ url_for('consult') if session.get('user_id') else url_for('register') }}"
+       class="btn btn-glass btn-lg">Start Free Consultation <i class="bi bi-arrow-right"></i></a>
+    <a href="#how" class="btn btn-outline-light btn-lg rounded-pill">How it works</a>
   </div>
 </div>
 
-<div class="row g-3">
-  <div class="col-md-4">
-    <div class="card h-100 shadow-sm p-4">
-      <h2>🤖 ML Prediction</h2>
-      <p class="text-muted mb-0">Select your symptoms and a Random Forest classifier predicts the most likely conditions with confidence scores.</p>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card h-100 shadow-sm p-4">
-      <h2>📊 History & Analytics</h2>
-      <p class="text-muted mb-0">Every prediction is saved to your account and visualised with interactive charts.</p>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card h-100 shadow-sm p-4">
-      <h2>📄 Health Reports</h2>
-      <p class="text-muted mb-0">Download a printable PDF report of any prediction with recommendations.</p>
-    </div>
-  </div>
+<div class="row g-3 mb-4 text-center">
+  <div class="col-6 col-md-3 reveal reveal-1"><div class="card-soft stat-card">
+    <h2>{{ disease_count }}</h2><small class="text-muted">Diseases</small></div></div>
+  <div class="col-6 col-md-3 reveal reveal-2"><div class="card-soft stat-card">
+    <h2>{{ symptom_count }}+</h2><small class="text-muted">Symptoms</small></div></div>
+  <div class="col-6 col-md-3 reveal reveal-3"><div class="card-soft stat-card">
+    <h2>100</h2><small class="text-muted">Health Score Tracking</small></div></div>
+  <div class="col-6 col-md-3 reveal reveal-3"><div class="card-soft stat-card">
+    <h2>AI</h2><small class="text-muted">Clinical Reasoning</small></div></div>
+</div>
+
+<h4 class="text-center fw-bold mb-4">A Complete Health Platform</h4>
+<div class="row g-3 mb-5">
+  <div class="col-md-4 col-lg-3 reveal"><div class="card-soft feature-card">
+    <div class="fi"><i class="bi bi-clipboard2-heart"></i></div><h6>Health Profile Setup</h6>
+    <p class="text-muted small mb-0">Guided onboarding: height, weight, activity, sleep, diet, habits &amp; history.</p></div></div>
+  <div class="col-md-4 col-lg-3 reveal reveal-1"><div class="card-soft feature-card">
+    <div class="fi"><i class="bi bi-robot"></i></div><h6>Strict AI Analysis</h6>
+    <p class="text-muted small mb-0">Evidence-based clinical reasoning — consistent, not random.</p></div></div>
+  <div class="col-md-4 col-lg-3 reveal reveal-2"><div class="card-soft feature-card">
+    <div class="fi"><i class="bi bi-graph-up-arrow"></i></div><h6>ML + Accuracy</h6>
+    <p class="text-muted small mb-0">Random Forest top-3 prediction with live confidence scores.</p></div></div>
+  <div class="col-md-4 col-lg-3 reveal reveal-3"><div class="card-soft feature-card">
+    <div class="fi"><i class="bi bi-speedometer2"></i></div><h6>Health Dashboard</h6>
+    <p class="text-muted small mb-0">Health score, BMI, water target, BMR &amp; lifestyle insights.</p></div></div>
+  <div class="col-md-4 col-lg-3 reveal"><div class="card-soft feature-card">
+    <div class="fi"><i class="bi bi-egg-fried"></i></div><h6>Personalized Diet Plan</h6>
+    <p class="text-muted small mb-0">Diet plans matched to your diet type and BMI category.</p></div></div>
+  <div class="col-md-4 col-lg-3 reveal reveal-1"><div class="card-soft feature-card">
+    <div class="fi"><i class="bi bi-person-walking"></i></div><h6>Exercise Plan</h6>
+    <p class="text-muted small mb-0">Activity plans matched to your fitness level and severity.</p></div></div>
+  <div class="col-md-4 col-lg-3 reveal reveal-2"><div class="card-soft feature-card">
+    <div class="fi"><i class="bi bi-geo-alt"></i></div><h6>Nearest Doctor</h6>
+    <p class="text-muted small mb-0">Correct specialist for your disease, near your city.</p></div></div>
+  <div class="col-md-4 col-lg-3 reveal reveal-3"><div class="card-soft feature-card">
+    <div class="fi"><i class="bi bi-file-earmark-medical"></i></div><h6>Case Sheet PDF</h6>
+    <p class="text-muted small mb-0">Full printable medical report with follow-up plan.</p></div></div>
+</div>
+
+<h4 class="text-center fw-bold mb-4" id="how">How It Works</h4>
+<div class="row g-3 mb-4 text-center">
+  {% set steps = [('1','bi-person-vcard','Build Profile'),('2','bi-clipboard2-pulse','Describe Symptoms'),
+                  ('3','bi-cpu','AI + ML Analysis'),('4','bi-file-earmark-check','Plan & Report')] %}
+  {% for n, icon, label in steps %}
+  <div class="col-6 col-md-3 reveal"><div class="card-soft p-4 h-100">
+    <div class="fi mx-auto"><i class="bi {{ icon }}"></i></div>
+    <div class="fw-bold small mt-2">{{ n }}. {{ label }}</div></div></div>
+  {% endfor %}
+</div>
+
+<div class="hero hero-cta mb-4 reveal">
+  <h3 class="fw-bold">Ready to meet your AI doctor?</h3>
+  <p class="lead mb-4">Free • 2-minute setup • Your data stays on your server</p>
+  <a href="{{ url_for('register') if not session.get('user_id') else url_for('consult') }}"
+     class="btn btn-glass btn-lg">Get Started Now <i class="bi bi-arrow-right"></i></a>
 </div>
 {% endblock %}

@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}AI Consultation | Smart Health Assistant{% endblock %}
+{% block content %}
+<div class="card-soft p-4 p-md-5">
+
+  <div class="d-flex justify-content-between align-items-center mb-1">
+    <h4 class="fw-bold mb-0"><i class="bi bi-clipboard2-pulse text-primary"></i> AI Health Consultation</h4>
+    {% if ai_enabled %}<span class="badge text-bg-success"><i class="bi bi-stars"></i> Gemini AI Active</span>
+    {% else %}<span class="badge text-bg-secondary">Built-in Engine</span>{% endif %}
+  </div>
+  <p class="text-muted small">Answer like a real doctor visit — it takes under 2 minutes.</p>
+
+  <div class="stepper">
+    <div class="step-dot active" id="dot0"><span class="num">1</span><small>Basic Details</small></div>
+    <div class="step-dot" id="dot1"><span class="num">2</span><small>Symptoms</small></div>
+    <div class="step-dot" id="dot2"><span class="num">3</span><small>Medical History</small></div>
+    <div class="step-dot" id="dot3"><span class="num">4</span><small>Reports &amp; Submit</small></div>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" id="consultForm">
+
+    <!-- STEP 1 -->
+    <div class="step active" id="step0">
+      <h6 class="fw-bold mb-3"><i class="bi bi-info-circle text-primary"></i> About your problem</h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">How long has this problem been happening? *</label>
+          <select name="duration" class="form-select form-select-lg" id="duration">
+            <option value="">-- Select duration --</option>
+            {% for d in durations %}<option>{{ d }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">How severe is it? *</label>
+          <div class="row g-2">
+            <div class="col-4"><label class="severity-card">
+              <input type="radio" name="severity" value="Mild">
+              <i class="bi bi-emoji-smile text-success"></i>
+              <div><strong class="d-block" style="font-size:.9rem">Mild</strong>
+              <small class="text-muted" style="font-size:.72rem">Daily life OK</small></div></label></div>
+            <div class="col-4"><label class="severity-card">
+              <input type="radio" name="severity" value="Moderate">
+              <i class="bi bi-emoji-neutral text-warning"></i>
+              <div><strong class="d-block" style="font-size:.9rem">Moderate</strong>
+              <small class="text-muted" style="font-size:.72rem">Some disturbance</small></div></label></div>
+            <div class="col-4"><label class="severity-card">
+              <input type="radio" name="severity" value="Severe">
+              <i class="bi bi-emoji-frown text-danger"></i>
+              <div><strong class="d-block" style="font-size:.9rem">Severe</strong>
+              <small class="text-muted" style="font-size:.72rem">Can't manage</small></div></label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step1">
+      <h6 class="fw-bold mb-2"><i class="bi bi-clipboard2-pulse text-primary"></i> Select your symptoms</h6>
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <input type="text" id="symptomSearch" class="form-control rounded-pill"
+               placeholder="🔍 Search symptom (fever, headache...)">
+        <span class="badge bg-primary rounded-pill p-2" id="counter">0 selected</span>
+      </div>
+      <div class="chip-grid border rounded-4 p-3 bg-light mb-3" id="symptomList">
+        {% for s in symptoms %}
+        <input type="checkbox" class="d-none" id="s{{ loop.index }}" name="symptoms"
+               value="{{ s }}" autocomplete="off">
+        <label class="chip" for="s{{ loop.index }}" data-sym="{{ s }}">{{ s|title }}</label>
+        {% endfor %}
+      </div>
+
+      <label class="form-label fw-semibold mb-1">Symptom not in the list? Add your own:</label>
+      <div class="input-group mb-2">
+        <input type="text" id="customInput" class="form-control rounded-start-4"
+               placeholder="e.g. pain behind the left ear">
+        <button type="button" class="btn btn-grad" id="addCustom"><i class="bi bi-plus-lg"></i> Add</button>
+      </div>
+      <div id="customList"></div>
+      <input type="hidden" name="custom_symptoms" id="customField" value="[]">
+      <small class="text-muted">Minimum 3 symptoms total (selected + custom) for a proper analysis.</small>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step2">
+      <h6 class="fw-bold mb-3"><i class="bi bi-journal-medical text-primary"></i> Your medical background</h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Past medical history <small class="text-muted">(illnesses, surgeries)</small></label>
+          <textarea name="past_history" class="form-control" rows="3"
+            placeholder="e.g. Asthma since childhood, appendix surgery 2019">{{ user.past_history or '' }}</textarea>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Family medical history</label>
+          <textarea name="family_history" class="form-control" rows="3"
+            placeholder="e.g. Father: diabetes, Mother: hypertension">{{ user.family_history or '' }}</textarea>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Known allergies <small class="text-muted">(medicines, food, dust)</small></label>
+          <textarea name="allergies" class="form-control" rows="2"
+            placeholder="e.g. Penicillin, dust, peanuts">{{ user.allergies or '' }}</textarea>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Current medications</label>
+          <textarea name="medications" class="form-control" rows="2"
+            placeholder="e.g. Vitamin D tablets, BP medicine">{{ user.medications or '' }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step" id="step3">
+      <h6 class="fw-bold mb-3"><i class="bi bi-file-earmark-arrow-up text-primary"></i> Previous medical reports (optional)</h6>
+      <label class="dropzone mb-3">
+        <input type="file" name="report_file" hidden accept=".png,.jpg,.jpeg,.pdf">
+        <i class="bi bi-cloud-arrow-up"></i>
+        <strong>Tap to upload an old report</strong>
+        <small class="text-muted">PDF, JPG or PNG • max 16 MB</small>
+        <span id="fileName" class="text-primary fw-semibold"></span>
+      </label>
+      <div class="form-check p-3 border rounded-4 bg-light">
+        <input class="form-check-input" type="checkbox" name="consent" id="consent">
+        <label class="form-check-label small" for="consent">
+          I understand this is an <strong>educational preliminary assessment</strong>, not a medical
+          diagnosis, and I will consult a qualified doctor for confirmation.
+        </label>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="d-flex justify-content-between mt-4">
+      <button type="button" class="btn btn-outline-secondary rounded-pill px-4" id="btnPrev">
+        <i class="bi bi-arrow-left"></i> Back
+      </button>
+      <button type="button" class="btn btn-grad rounded-pill px-4" id="btnNext">
+        Next <i class="bi bi-arrow-right"></i>
+      </button>
+      <button type="submit" class="btn btn-grad rounded-pill px-4 d-none" id="btnSubmit">
+        <i class="bi bi-cpu"></i> Get AI Diagnosis
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const steps = [...document.querySelectorAll('.step')];
+let cur = 0;
+
+function show(i){
+  cur = i;
+  steps.forEach((s, idx) => s.classList.toggle('active', idx === i));
+  for (let k = 0; k < 4; k++){
+    const dot = document.getElementById('dot'+k);
+    dot.classList.toggle('active', k === i);
+    dot.classList.toggle('done', k < i);
+    dot.querySelector('.num').textContent = k < i ? '✓' : (k+1);
+  }
+  document.getElementById('btnPrev').style.visibility = i === 0 ? 'hidden' : 'visible';
+  document.getElementById('btnNext').classList.toggle('d-none', i === 3);
+  document.getElementById('btnSubmit').classList.toggle('d-none', i !== 3);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function validate(i){
+  if (i === 0){
+    if (!document.getElementById('duration').value){ alert('Please select symptom duration.'); return false; }
+    if (!document.querySelector('input[name="severity"]:checked')){ alert('Please select severity.'); return false; }
+  }
+  if (i === 1){
+    const total = checkedCount() + custom.length;
+    if (total < 3){ alert('Please select/describe at least 3 symptoms.'); return false; }
+  }
+  if (i === 3){
+    if (!document.getElementById('consent').checked){ alert('Please accept the awareness declaration.'); return false; }
+  }
+  return true;
+}
+
+document.getElementById('btnNext').onclick = () => { if (validate(cur)) show(cur + 1); };
+document.getElementById('btnPrev').onclick = () => show(cur - 1);
+document.getElementById('consultForm').onsubmit = (e) => { if (!validate(0) || !validate(1) || !validate(3)) e.preventDefault(); };
+
+/* ---- symptom search + counter ---- */
+function checkedCount(){ return document.querySelectorAll('input[name="symptoms"]:checked').length; }
+function updateCount(){
+  document.getElementById('counter').textContent = (checkedCount() + custom.length) + ' selected';
+}
+document.getElementById('symptomSearch').addEventListener('input', function(){
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.chip').forEach(c => {
+    c.style.display = c.dataset.sym.includes(q) ? '' : 'none';
+  });
+});
+document.querySelectorAll('input[name="symptoms"]').forEach(cb => cb.addEventListener('change', updateCount));
+
+/* ---- custom symptoms ---- */
+let custom = [];
+function renderCustom(){
+  const box = document.getElementById('customList');
+  box.innerHTML = custom.map((c, i) =>
+    `<span class="custom-pill">＋ ${c} <button type="button" onclick="removeCustom(${i})">✕</button></span>`).join('');
+  document.getElementById('customField').value = JSON.stringify(custom);
+  updateCount();
+}
+function removeCustom(i){ custom.splice(i, 1); renderCustom(); }
+function addCustom(){
+  const inp = document.getElementById('customInput');
+  const v = inp.value.trim().toLowerCase();
+  if (v && !custom.includes(v)) custom.push(v);
+  inp.value = ''; renderCustom(); inp.focus();
+}
+document.getElementById('addCustom').onclick = addCustom;
+document.getElementById('customInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter'){ e.preventDefault(); addCustom(); }
+});
+
+/* ---- file name display ---- */
+document.querySelector('input[name="report_file"]').addEventListener('change', function(){
+  document.getElementById('fileName').textContent = this.files[0] ? '📄 ' + this.files[0].name : '';
+});
+</script>
+{% endblock %}

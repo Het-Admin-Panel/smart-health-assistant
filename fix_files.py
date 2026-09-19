@@ -1,4 +1,11 @@
-{% extends "base.html" %}
+"""fix_files.py — auto-fixes the 2 problems found by check_files.py
+Run:  python fix_files.py
+"""
+
+import os
+
+# ============ FIX 1: rewrite register.html (correct version) ============
+REGISTER_HTML = """{% extends "base.html" %}
 {% block title %}Register | Smart Health Assistant{% endblock %}
 {% block content %}
 <div class="auth-wrap">
@@ -56,3 +63,24 @@
   </div>
 </div>
 {% endblock %}
+"""
+
+with open(os.path.join("templates", "register.html"), "w", encoding="utf-8") as f:
+    f.write(REGISTER_HTML)
+print("FIXED  : templates/register.html rewritten with the correct version")
+
+# ============ FIX 2: repair the onboarding.html typo ============
+path = os.path.join("templates", "onboarding.html")
+text = open(path, encoding="utf-8").read()
+if "'Sedentary %}" in text:
+    text = text.replace("'Sedentary %}", "'Sedentary' %}")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+    print("FIXED  : onboarding.html — missing quote after 'Sedentary' added")
+elif "'Sedentary' %}" in text:
+    print("OK     : onboarding.html typo already fixed")
+else:
+    print("WARN   : onboarding.html — expected text not found, check manually")
+
+print()
+print("DONE! Now:  1) Ctrl+C in the app terminal   2) python app.py   3) Ctrl+F5 in browser")

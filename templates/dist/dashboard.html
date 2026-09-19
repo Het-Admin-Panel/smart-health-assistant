@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+  <div>
+    <h4 class="fw-bold mb-0">Hi {{ user.name.split(' ')[0] }} 👋</h4>
+    <small class="text-muted">Your personal health overview</small>
+  </div>
+  <a href="{{ url_for('consult') }}" class="btn btn-grad">
+    <i class="bi bi-clipboard2-pulse"></i> Start AI Consultation</a>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Health score gauge -->
+  <div class="col-lg-4">
+    <div class="card-soft p-4 text-center h-100">
+      <small class="text-muted text-uppercase fw-bold">Lifestyle Health Score</small>
+      <div class="gauge-ring my-3 mx-auto {% if m.health_score >= 65 %}g-good{% elif m.health_score >= 45 %}g-fair{% else %}g-bad{% endif %}" style="--val:{{ m.health_score }}">
+        <div class="gauge-inner"><span>{{ m.health_score }}</span>
+        <small class="text-muted">{{ m.score_label }}</small></div>
+      </div>
+      <div class="progress" style="height:6px">
+        <div class="progress-bar {% if m.health_score >= 65 %}bg-success{% elif m.health_score >= 45 %}bg-warning{% else %}bg-danger{% endif %}"
+             style="width:{{ m.health_score }}%"></div>
+      </div>
+      <small class="text-muted mt-2 d-block">Based on BMI, activity, sleep, stress, smoking &amp; alcohol</small>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="col-lg-8">
+    <div class="row g-3 h-100">
+      <div class="col-6 col-md-4"><div class="card-soft metric-card p-3 h-100">
+        <div class="mi"><i class="bi bi-speedometer2"></i></div>
+        <div><div class="fs-4 fw-bold">{{ m.bmi or '—' }}</div>
+        <small class="text-muted">BMI • <span class="{% if m.bmi_category == 'Normal' %}text-success{% elif m.bmi_category %}text-warning{% endif %}">{{ m.bmi_category or 'add data' }}</span></small></div>
+      </div></div>
+      <div class="col-6 col-md-4"><div class="card-soft metric-card p-3 h-100">
+        <div class="mi"><i class="bi bi-droplet-fill"></i></div>
+        <div><div class="fs-4 fw-bold">{{ m.water or '—' }} L</div>
+        <small class="text-muted">Daily water target</small></div>
+      </div></div>
+      <div class="col-6 col-md-4"><div class="card-soft metric-card p-3 h-100">
+        <div class="mi"><i class="bi bi-moon-stars-fill"></i></div>
+        <div><div class="fs-4 fw-bold">{{ user.sleep_hours or '—' }} h</div>
+        <small class="text-muted">Sleep per day</small></div>
+      </div></div>
+      <div class="col-6 col-md-4"><div class="card-soft metric-card p-3 h-100">
+        <div class="mi"><i class="bi bi-lightning-charge-fill"></i></div>
+        <div><div class="fs-4 fw-bold">{{ user.physical_activity or '—' }}</div>
+        <small class="text-muted">Activity level</small></div>
+      </div></div>
+      <div class="col-6 col-md-4"><div class="card-soft metric-card p-3 h-100">
+        <div class="mi"><i class="bi bi-fire"></i></div>
+        <div><div class="fs-4 fw-bold">{{ m.bmr or '—' }}</div>
+        <small class="text-muted">BMR kcal/day</small></div>
+      </div></div>
+      <div class="col-6 col-md-4"><div class="card-soft metric-card p-3 h-100">
+        <div class="mi"><i class="bi bi-clipboard2-pulse"></i></div>
+        <div><div class="fs-4 fw-bold">{{ total }}</div>
+        <small class="text-muted">Consultations done</small></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Personalized insights -->
+  <div class="col-lg-5">
+    <div class="card-soft p-4 h-100">
+      <h6 class="fw-bold mb-3"><i class="bi bi-stars text-warning"></i> Your Personalized Health Insights</h6>
+      {% for tip in m.tips %}
+      <div class="d-flex gap-2 mb-3">
+        <i class="bi bi-check-circle-fill text-success mt-1"></i>
+        <small>{{ tip }}</small>
+      </div>
+      {% endfor %}
+      {% if m.ideal_weight %}
+      <div class="alert alert-primary small mb-0 rounded-4">
+        <i class="bi bi-bullseye"></i> Ideal weight for your height: <strong>{{ m.ideal_weight }}</strong>
+      </div>
+      {% endif %}
+      <a href="{{ url_for('profile') }}" class="btn btn-outline-primary btn-sm mt-3 rounded-pill">
+        <i class="bi bi-pencil"></i> Update Profile</a>
+    </div>
+  </div>
+
+  <!-- Recent consultations -->
+  <div class="col-lg-7">
+    <div class="card-soft p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary"></i> Recent Consultations</h6>
+        <a href="{{ url_for('history') }}" class="small">View all →</a>
+      </div>
+      {% if recent %}
+      <div class="table-responsive">
+        <table class="table table-sm table-hover table-soft mb-0">
+          <thead><tr><th>Date</th><th>Disease</th><th>Acc.</th><th>Severity</th><th></th></tr></thead>
+          <tbody>
+            {% for p in recent %}
+            <tr>
+              <td class="small">{{ p.created_at.strftime('%d %b') }}</td>
+              <td><strong>{{ p.disease }}</strong>
+                {% if p.disease in urgent_set %}<span class="badge text-bg-danger">⚠</span>{% endif %}</td>
+              <td>{{ p.confidence }}%</td>
+              <td><span class="badge {% if p.severity == 'Severe' %}text-bg-danger{% elif p.severity == 'Moderate' %}text-bg-warning{% else %}text-bg-success{% endif %}">{{ p.severity }}</span></td>
+              <td><a href="{{ url_for('result', prediction_id=p.id) }}" class="btn btn-sm btn-outline-primary">Open</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="alert alert-info rounded-4">No consultations yet —
+      <a href="{{ url_for('consult') }}">start your first AI consultation →</a></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

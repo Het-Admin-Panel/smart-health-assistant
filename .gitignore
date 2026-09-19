@@ -1,4 +1,7 @@
 venv/
 __pycache__/
 instance/
+uploads/
 *.pyc
+gemini_key.txt
+database.db

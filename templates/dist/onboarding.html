@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Health Profile Setup{% endblock %}
+{% block content %}
+<div class="card-soft p-4 p-md-5 mx-auto" style="max-width:860px">
+  <div class="text-center mb-2">
+    <h4 class="fw-bold mb-1"><i class="bi bi-clipboard2-heart text-primary"></i> Your Health Profile</h4>
+    <p class="text-muted small mb-0">Tell us once — your AI doctor uses this in <strong>every</strong> diagnosis</p>
+  </div>
+
+  <div class="stepper">
+    <div class="step-dot active" id="dot0"><span class="num">1</span><small>Basic</small></div>
+    <div class="step-dot" id="dot1"><span class="num">2</span><small>Body</small></div>
+    <div class="step-dot" id="dot2"><span class="num">3</span><small>Lifestyle</small></div>
+    <div class="step-dot" id="dot3"><span class="num">4</span><small>Medical</small></div>
+  </div>
+
+  <form method="POST" id="obForm">
+
+    <!-- STEP 1 -->
+    <div class="step active" id="step0">
+      <div class="row g-3">
+        <div class="col-md-4"><label class="form-label small fw-semibold">Age *</label>
+          <input type="number" name="age" min="1" max="120" class="form-control form-control-lg" value="{{ user.age or '' }}" required></div>
+        <div class="col-md-4"><label class="form-label small fw-semibold">Gender *</label>
+          <select name="gender" class="form-select form-select-lg" required>
+            <option value="">--</option>
+            {% for g in ['Male','Female','Other'] %}<option {% if user.gender == g %}selected{% endif %}>{{ g }}</option>{% endfor %}
+          </select></div>
+        <div class="col-md-4"><label class="form-label small fw-semibold">Blood Group</label>
+          <select name="blood_group" class="form-select form-select-lg">
+            <option value="">--</option>
+            {% for b in ['A+','A-','B+','B-','AB+','AB-','O+','O-'] %}<option {% if user.blood_group == b %}selected{% endif %}>{{ b }}</option>{% endfor %}
+          </select></div>
+        <div class="col-md-6"><label class="form-label small fw-semibold">City</label>
+          <input type="text" name="city" class="form-control form-control-lg" value="{{ user.city or '' }}" placeholder="For finding nearby doctors"></div>
+        <div class="col-md-6"><label class="form-label small fw-semibold">Occupation</label>
+          <input type="text" name="occupation" class="form-control form-control-lg" value="{{ user.occupation or '' }}" placeholder="e.g. Student, Teacher, Engineer"></div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step1">
+      <div class="row g-3 justify-content-center">
+        <div class="col-md-5"><label class="form-label small fw-semibold">Height (cm) *</label>
+          <input type="number" name="height_cm" id="height" min="80" max="250" class="form-control form-control-lg" value="{{ user.height_cm or '' }}" required></div>
+        <div class="col-md-5"><label class="form-label small fw-semibold">Weight (kg) *</label>
+          <input type="number" name="weight_kg" id="weight" min="20" max="250" class="form-control form-control-lg" value="{{ user.weight_kg or '' }}" required></div>
+        <div class="col-12 text-center mt-3">
+          <div class="card-soft stat-card d-inline-block px-5 py-3">
+            <div id="bmiBox" class="fs-1 fw-bold text-primary">—</div>
+            <small class="text-muted">Live BMI</small>
+            <div id="idealW" class="small text-success fw-semibold mt-1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step2">
+      <label class="form-label small fw-semibold">Physical Activity *</label>
+      <div class="row g-2 mb-3">
+        {% for a in activities %}
+        <div class="col-6 col-md-3"><label class="opt-card">
+          <input type="radio" name="physical_activity" value="{{ a }}" {% if user.physical_activity == a %}checked{% endif %} required>
+          <i class="bi {% if a == 'Active' %}bi-lightning-charge-fill text-success{% elif a == 'Moderate' %}bi-person-walking text-primary{% elif a == 'Light' %}bi-scooter text-warning{% else %}bi-chair text-danger{% endif %}"></i>
+          <div><strong class="d-block" style="font-size:.85rem">{{ a }}</strong>
+          <small class="text-muted" style="font-size:.7rem">{% if a == 'Sedentary %}Mostly sitting{% elif a == 'Light' %}1-2 days/week{% elif a == 'Moderate' %}3-5 days/week{% else %}Daily exercise{% endif %}</small></div></label></div>
+        {% endfor %}
+      </div>
+      <div class="row g-3">
+        <div class="col-md-4"><label class="form-label small fw-semibold">Sleep (hours/day) *</label>
+          <input type="number" name="sleep_hours" step="0.5" min="3" max="14" class="form-control form-control-lg" value="{{ user.sleep_hours or '' }}" required></div>
+        <div class="col-md-4"><label class="form-label small fw-semibold">Diet Type *</label>
+          <select name="diet_type" class="form-select form-select-lg" required>
+            <option value="">--</option>
+            {% for d in diets %}<option {% if user.diet_type == d %}selected{% endif %}>{{ d }}</option>{% endfor %}
+          </select></div>
+        <div class="col-md-4"><label class="form-label small fw-semibold">Stress Level *</label>
+          <select name="stress_level" class="form-select form-select-lg" required>
+            <option value="">--</option>
+            {% for s in stress %}<option {% if user.stress_level == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+          </select></div>
+        <div class="col-md-6"><label class="form-label small fw-semibold">Smoking</label>
+          <select name="smoking" class="form-select form-select-lg">
+            <option value="">--</option>
+            {% for s in smoking %}<option {% if user.smoking == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+          </select></div>
+        <div class="col-md-6"><label class="form-label small fw-semibold">Alcohol</label>
+          <select name="alcohol" class="form-select form-select-lg">
+            <option value="">--</option>
+            {% for a in alcohol %}<option {% if user.alcohol == a %}selected{% endif %}>{{ a }}</option>{% endfor %}
+          </select></div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step" id="step3">
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label small fw-semibold">Past medical history</label>
+          <textarea name="past_history" rows="3" class="form-control" placeholder="Illnesses, surgeries, injuries...">{{ user.past_history or '' }}</textarea></div>
+        <div class="col-md-6"><label class="form-label small fw-semibold">Family medical history</label>
+          <textarea name="family_history" rows="3" class="form-control" placeholder="e.g. Father: diabetes, Mother: hypertension">{{ user.family_history or '' }}</textarea></div>
+        <div class="col-md-6"><label class="form-label small fw-semibold">Known allergies</label>
+          <textarea name="allergies" rows="2" class="form-control" placeholder="Medicines, food, dust...">{{ user.allergies or '' }}</textarea></div>
+        <div class="col-md-6"><label class="form-label small fw-semibold">Current medications</label>
+          <textarea name="medications" rows="2" class="form-control" placeholder="Medicines you take regularly">{{ user.medications or '' }}</textarea></div>
+      </div>
+      <div class="alert alert-primary mt-3 small rounded-4">
+        <i class="bi bi-shield-check"></i> Your data stays on your own server and is used
+        only to personalise your health assessment.
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+      <button type="button" class="btn btn-outline-secondary rounded-pill px-4" id="btnPrev" style="visibility:hidden">
+        <i class="bi bi-arrow-left"></i> Back</button>
+      <button type="button" class="btn btn-grad rounded-pill px-4" id="btnNext">
+        Next <i class="bi bi-arrow-right"></i></button>
+      <button type="submit" class="btn btn-grad rounded-pill px-4 d-none" id="btnFinish">
+        <i class="bi bi-check-lg"></i> Finish Setup</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const steps = [...document.querySelectorAll('.step')];
+let cur = 0;
+function show(i){
+  cur = i;
+  steps.forEach((s, idx) => s.classList.toggle('active', idx === i));
+  for (let k = 0; k < 4; k++){
+    const dot = document.getElementById('dot'+k);
+    dot.classList.toggle('active', k === i);
+    dot.classList.toggle('done', k < i);
+    dot.querySelector('.num').textContent = k < i ? '✓' : (k+1);
+  }
+  document.getElementById('btnPrev').style.visibility = i === 0 ? 'hidden' : 'visible';
+  document.getElementById('btnNext').classList.toggle('d-none', i === 3);
+  document.getElementById('btnFinish').classList.toggle('d-none', i !== 3);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.getElementById('btnNext').onclick = () => show(cur + 1);
+document.getElementById('btnPrev').onclick = () => show(cur - 1);
+
+/* ---- LIVE BMI ---- */
+function calcBMI(){
+  const h = parseFloat(document.getElementById('height').value);
+  const w = parseFloat(document.getElementById('weight').value);
+  const box = document.getElementById('bmiBox');
+  if (h > 0 && w > 0){
+    const bmi = (w / Math.pow(h/100, 2)).toFixed(1);
+    let cat, cls;
+    if (bmi < 18.5){ cat='Underweight'; cls='text-warning'; }
+    else if (bmi < 25){ cat='Normal ✅'; cls='text-success'; }
+    else if (bmi < 30){ cat='Overweight'; cls='text-warning'; }
+    else { cat='Obese'; cls='text-danger'; }
+    box.className = 'fs-1 fw-bold ' + cls;
+    box.textContent = bmi + '  ';
+    const small = document.createElement('small');
+    small.className = 'text-muted';
+    small.textContent = cat;
+    box.appendChild(small);
+    const lo = (18.5*Math.pow(h/100,2)).toFixed(1), hi = (24.9*Math.pow(h/100,2)).toFixed(1);
+    document.getElementById('idealW').textContent = `Ideal weight: ${lo}–${hi} kg`;
+  } else {
+    box.className = 'fs-1 fw-bold text-muted'; box.textContent = '—';
+    document.getElementById('idealW').textContent = '';
+  }
+}
+document.getElementById('height').addEventListener('input', calcBMI);
+document.getElementById('weight').addEventListener('input', calcBMI);
+calcBMI();
+</script>
+{% endblock %}

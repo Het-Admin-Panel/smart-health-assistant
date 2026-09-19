@@ -3,3 +3,4 @@ flask_sqlalchemy
 scikit-learn
 pandas
 gunicorn
+google-generativeai

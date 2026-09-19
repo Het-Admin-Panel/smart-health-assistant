@@ -1,68 +1,47 @@
 {% extends "base.html" %}
-{% block title %}Admin | Smart Health Assistant{% endblock %}
+{% block title %}Admin Dashboard{% endblock %}
 {% block content %}
-<h4 class="mb-3">Admin Dashboard</h4>
+<h4 class="fw-bold mb-4"><i class="bi bi-shield-lock text-primary"></i> Admin Dashboard</h4>
 
 <div class="row g-3 mb-4">
-  <div class="col-md-4">
-    <div class="card shadow-sm p-3 text-center">
-      <h2 class="text-primary fw-bold mb-0">{{ users|length }}</h2><small>Registered Users</small>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card shadow-sm p-3 text-center">
-      <h2 class="text-primary fw-bold mb-0">{{ total_preds }}</h2><small>Total Predictions</small>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card shadow-sm p-3 text-center">
-      <h6 class="text-primary fw-bold mb-0">{{ top_diseases[0][0] if top_diseases else '—' }}</h6>
-      <small>Most Predicted Disease</small>
-    </div>
-  </div>
+  <div class="col-6 col-md-3"><div class="card-soft stat-card">
+    <h2>{{ stats.users }}</h2><small class="text-muted"><i class="bi bi-people"></i> Users</small></div></div>
+  <div class="col-6 col-md-3"><div class="card-soft stat-card">
+    <h2>{{ stats.total }}</h2><small class="text-muted"><i class="bi bi-clipboard2-pulse"></i> Consultations</small></div></div>
+  <div class="col-6 col-md-3"><div class="card-soft stat-card">
+    <h2>{{ stats.today }}</h2><small class="text-muted"><i class="bi bi-calendar-day"></i> Today</small></div></div>
+  <div class="col-6 col-md-3"><div class="card-soft stat-card">
+    <h2 class="text-danger">{{ stats.urgent }}</h2><small class="text-muted"><i class="bi bi-exclamation-triangle"></i> Urgent Cases</small></div></div>
 </div>
 
-<div class="row g-3">
-  <div class="col-lg-7">
-    <div class="card shadow-sm p-3">
-      <h6>📋 Recent Predictions</h6>
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card-soft p-4 h-100">
+      <h6 class="fw-bold mb-3">🏆 Top Predicted Diseases</h6>
+      <canvas id="topChart" height="220"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card-soft p-4 h-100">
+      <h6 class="fw-bold mb-3">📋 Recent Consultations</h6>
       <div class="table-responsive">
-        <table class="table table-sm table-hover mb-0">
-          <thead><tr><th>User</th><th>Disease</th><th>Confidence</th><th>Date</th></tr></thead>
+        <table class="table table-sm table-hover table-soft mb-0">
+          <thead><tr><th>Patient</th><th>Disease</th><th>Acc.</th><th>Sev.</th><th>AI</th><th>Report</th><th>Date</th></tr></thead>
           <tbody>
             {% for p in predictions %}
             <tr>
               <td>{{ p.user.name }}</td>
-              <td><strong>{{ p.disease }}</strong></td>
+              <td><strong>{{ p.disease }}</strong>
+                {% if p.disease in urgent_set %}<span class="badge text-bg-danger">⚠</span>{% endif %}</td>
               <td>{{ p.confidence }}%</td>
-              <td>{{ p.created_at.strftime('%d %b %Y') }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-  <div class="col-lg-5">
-    <div class="card shadow-sm p-3 mb-3">
-      <h6>🏆 Top Predicted Diseases</h6>
-      <ol class="mb-0">
-        {% for d, c in top_diseases %}
-          <li>{{ d }} <span class="badge bg-primary">{{ c }}</span></li>
-        {% endfor %}
-      </ol>
-    </div>
-    <div class="card shadow-sm p-3">
-      <h6>👥 Registered Users</h6>
-      <div class="table-responsive">
-        <table class="table table-sm table-hover mb-0">
-          <thead><tr><th>Name</th><th>Email</th><th>Joined</th></tr></thead>
-          <tbody>
-            {% for u in users %}
-            <tr>
-              <td>{{ u.name }}{% if u.is_admin %} <span class="badge text-bg-dark">admin</span>{% endif %}</td>
-              <td>{{ u.email }}</td>
-              <td>{{ u.created_at.strftime('%d %b %Y') }}</td>
+              <td>{{ p.severity }}</td>
+              <td>{% if p.ai_engine and p.ai_engine != 'built-in engine' %}
+                  <span class="badge text-bg-success">Gemini</span>
+                  {% else %}<span class="badge text-bg-secondary">Engine</span>{% endif %}</td>
+              <td>{% if p.report_filename %}
+                  <a href="{{ url_for('uploaded_file', filename=p.report_filename) }}" target="_blank"
+                     class="badge text-bg-info"><i class="bi bi-paperclip"></i></a>{% else %}-{% endif %}</td>
+              <td class="small">{{ p.created_at.strftime('%d %b') }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -71,4 +50,37 @@
     </div>
   </div>
 </div>
+
+<div class="card-soft p-4 mt-4">
+  <h6 class="fw-bold mb-3">👥 Registered Users</h6>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover table-soft mb-0">
+      <thead><tr><th>Name</th><th>Email</th><th>City</th><th>Allergies</th><th>Joined</th></tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>{{ u.name }}{% if u.is_admin %} <span class="badge text-bg-dark">admin</span>{% endif %}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.city or '—' }}</td>
+          <td class="small">{{ (u.allergies or '—')[:40] }}</td>
+          <td>{{ u.created_at.strftime('%d %b %Y') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+new Chart(document.getElementById('topChart'), {
+  type: 'doughnut',
+  data: { labels: {{ chart_labels|safe }},
+    datasets: [{ data: {{ chart_data|safe }},
+      backgroundColor: ['#0d9488','#0891b2','#6366f1','#f59e0b','#ef4444','#10b981'] }] },
+  options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 14 } } } }
+});
+</script>
 {% endblock %}

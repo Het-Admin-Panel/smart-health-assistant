@@ -1,62 +1,99 @@
 {% extends "base.html" %}
-
-{% block title %}Result | Smart Health Assistant{% endblock %}
-
+{% block title %}Diagnosis Result{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-8">
 
-    {% if urgent %}
-    <div class="alert alert-danger d-flex align-items-start shadow-sm">
-      <div class="fs-4 me-2">⚠️</div>
-      <div>
-        <strong>Urgent medical attention may be required.</strong><br>
-        Please consult a doctor as soon as possible.
+{% if urgent %}
+<div class="alert alert-danger d-flex align-items-start rounded-4 shadow-sm">
+  <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+  <div><strong>Urgent medical attention may be required.</strong><br>
+  Please consult a doctor as soon as possible.</div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card-soft p-4 text-center reveal">
+      <small class="text-muted text-uppercase fw-bold">Most Likely Condition</small>
+      {% if top3 and top3[0][1] > 0 %}
+      <div class="conf-ring my-3" style="--val: {{ top3[0][1] }}">
+        <div class="conf-inner"><span>{{ top3[0][1] }}%</span><small class="text-muted">confidence</small></div>
       </div>
+      <h3 class="fw-bold mb-1">{{ p.disease }}</h3>
+      <div class="mb-3">
+        {% if urgent %}<span class="badge text-bg-danger">⚠ Urgent</span>{% endif %}
+        <span class="badge text-bg-info"><i class="bi bi-cpu"></i> {{ engine }}</span>
+      </div>
+      <div class="text-start">
+        {% for disease, conf in top3 %}
+        <div class="d-flex justify-content-between small mb-1"><span>{{ disease }}</span><strong>{{ conf }}%</strong></div>
+        <div class="progress mb-2" style="height:8px">
+          <div class="progress-bar {% if loop.first %}bg-danger {% elif loop.index == 2 %}bg-warning {% else %}bg-secondary{% endif %}" style="width:{{ conf }}%"></div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="alert alert-warning mt-3">Not enough recognised symptoms for a statistical
+      match — please rely on the AI assessment and consult a doctor.</div>
+      {% endif %}
+    </div>
+
+    <div class="card-soft p-4 mt-3 reveal reveal-1">
+      <h6 class="fw-bold"><i class="bi bi-list-check text-primary"></i> Consultation Summary</h6>
+      <table class="table table-sm mb-2">
+        <tr><th>Duration</th><td>{{ p.duration }}</td></tr>
+        <tr><th>Severity</th><td>{{ p.severity }}</td></tr>
+        <tr><th>Date</th><td>{{ p.created_at.strftime('%d %b %Y, %H:%M') }}</td></tr>
+        {% if m.bmi %}<tr><th>BMI</th><td>{{ m.bmi }} ({{ m.bmi_category }})</td></tr>{% endif %}
+        <tr><th>Health Score</th><td>{{ m.health_score }}/100 — {{ m.score_label }}</td></tr>
+      </table>
+      <h6 class="small fw-bold text-muted">SYMPTOMS</h6>
+      {% for s in symptoms %}<span class="badge bg-primary-subtle text-primary border m-1">{{ s|title }}</span>{% endfor %}
+      {% for s in custom %}<span class="badge border m-1" style="background:#eef2ff;color:#4f46e5">＋ {{ s|title }}</span>{% endfor %}
+      {% if p.report_filename %}
+      <div class="mt-3"><a href="{{ url_for('uploaded_file', filename=p.report_filename) }}" target="_blank"
+        class="btn btn-sm btn-outline-primary"><i class="bi bi-paperclip"></i> View uploaded report</a></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card-soft ai-card reveal reveal-1">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="fw-bold mb-0"><i class="bi bi-robot text-primary"></i> AI Clinical Analysis &amp; Personalized Plan</h5>
+        <span class="badge text-bg-dark">{{ engine }}</span>
+      </div>
+      {{ ai_html|safe }}
+    </div>
+    {% if advice %}
+    <div class="card-soft p-4 mt-3 reveal reveal-2">
+      <h6 class="fw-bold"><i class="bi bi-heart-pulse text-danger"></i> Quick Care Guide — {{ p.disease }}</h6>
+      <p class="mb-0">{{ advice }}</p>
     </div>
     {% endif %}
-
-    <div class="card shadow-sm p-4 text-center mb-3">
-      <h6 class="text-muted mb-4">Based on your symptoms, the most likely conditions are</h6>
-
-      {% for disease, conf in top3 %}
-      <div class="mb-4 text-start">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-          <strong class="{% if loop.first %}fs-4 text-primary{% endif %}">
-            {% if loop.first %}🥇
-            {% elif loop.index == 2 %}🥈
-            {% else %}🥉{% endif %}
-            {{ disease }}
-          </strong>
-          <span class="badge bg-dark p-2">{{ conf }}%</span>
-        </div>
-        <div class="progress" style="height: 12px;">
-          <div class="progress-bar
-            {% if loop.first %}bg-danger
-            {% elif loop.index == 2 %}bg-warning
-            {% else %}bg-secondary{% endif %}"
-            style="width: {{ conf }}%;">
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-
-    <div class="card shadow-sm p-4 mb-3">
-      <h5>🩺 Recommendations — {{ top3[0][0] }}</h5>
-      <p class="mb-3">{{ advice }}</p>
-      <h6>Symptoms you selected</h6>
-      {% for s in selected %}
-        <span class="badge bg-primary-subtle text-primary border m-1">{{ s|title }}</span>
-      {% endfor %}
-    </div>
-
-    <div class="d-flex gap-2 justify-content-center">
-      <a href="{{ url_for('report', prediction_id=prediction_id) }}"
-         class="btn btn-outline-primary">📄 View / Download Report</a>
-      <a href="{{ url_for('predict') }}" class="btn btn-primary">🔄 New Prediction</a>
-    </div>
-
   </div>
+</div>
+
+<h5 class="fw-bold mt-4 mb-3"><i class="bi bi-geo-alt text-primary"></i> Recommended Doctors for {{ p.disease }}</h5>
+<div class="row g-3 mb-4">
+  {% for doc in specialists %}
+  <div class="col-md-4 reveal">
+    <div class="card-soft doctor-card">
+      <div class="di"><i class="bi bi-person-badge"></i></div>
+      <h6 class="fw-bold mb-1">{{ doc.specialty }}</h6>
+      <p class="text-muted small mb-2">{{ doc.reason }}</p>
+      <span class="badge {% if 'Immediately' in doc.urgency or '24' in doc.urgency %}text-bg-danger{% else %}text-bg-success{% endif %} mb-3">
+        <i class="bi bi-clock"></i> {{ doc.urgency }}</span><br>
+      <a href="{{ doc.maps }}" target="_blank" class="btn btn-grad btn-sm">
+        <i class="bi bi-geo-alt-fill"></i> Find Near Me</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="d-flex gap-2 justify-content-center mb-4">
+  <a href="{{ url_for('report', prediction_id=p.id) }}" class="btn btn-grad">
+    <i class="bi bi-file-earmark-medical"></i> Full Case Sheet Report</a>
+  <a href="{{ url_for('consult') }}" class="btn btn-outline-primary rounded-3">
+    <i class="bi bi-arrow-repeat"></i> New Consultation</a>
 </div>
 {% endblock %}
